@@ -341,9 +341,7 @@
                                     </div>
                                     <div class="violation-details">
                                         <div>ประเภท: ไม่สวมหมวกกันน็อค</div>
-                                        <div>ความแม่นยำ: ${v.license_plate_confidence 
-                                            ? v.license_plate_confidence.toFixed(2)
-                                            : v.confidence.toFixed(2)}%</div>
+                                        <div>ความแม่นยำ: ${(v.confidence*100).toFixed(2)}%</div>
                                     </div>
                                     <div class="timestamp">
                                         บันทึกเมื่อ: ${formatDateTimeBangkok(v.timestamp)}
