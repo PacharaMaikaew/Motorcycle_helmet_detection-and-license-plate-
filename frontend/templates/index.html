@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบตรวจจับการไม่สวมหมวกกันน็อค</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #2196F3;
+            --secondary-color: #1976D2;
+            --error-color: #f44336;
+            --success-color: #4CAF50;
+            --warning-color: #FFC107;
+            --text-color: #333;
+            --bg-color: #f5f5f5;
+        }
+
+        body {
+            font-family: 'Sarabun', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            text-align: center;
+            padding: 20px 0 30px;
+            border-bottom: 2px solid #eee;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: var(--primary-color);
+            font-size: 2.2em;
+            margin: 0;
+            font-weight: 600;
+        }
+
+        .header p {
+            color: #666;
+            margin-top: 10px;
+            font-size: 1.1em;
+        }
+
+        .upload-section {
+            text-align: center;
+            padding: 30px;
+            background-color: #f8f9fa;
+            border: 2px dashed var(--primary-color);
+            border-radius: 15px;
+            margin: 30px 0;
+            transition: all 0.3s ease;
+        }
+
+        .upload-section:hover {
+            border-color: var(--secondary-color);
+            background-color: #e3f2fd;
+        }
+
+        .upload-button {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Sarabun', sans-serif;
+        }
+
+        .upload-button:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .video-section {
+            margin: 40px 0;
+            background: #000;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+
+        .video-container {
+            aspect-ratio: 16 / 9;
+            width: 100%;
+            position: relative;
+        }
+
+        .video-container img {
+            width: 100%;
+            height: auto;
+        }
+
+        .violations-section {
+            margin-top: 40px;
+        }
+
+        .violations-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .violations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+        }
+
+        .violation-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            border: 1px solid #eee;
+        }
+
+        .violation-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        }
+
+        .violation-images {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .violation-image-container {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            aspect-ratio: 4/3;
+        }
+
+        .violation-image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .image-label {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .progress-bar-container {
+            margin: 25px auto;
+            max-width: 80%;
+            display: none;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            transition: width 0.4s ease;
+        }
+
+        #uploadError {
+            display: none;
+            margin: 15px 0;
+            padding: 12px;
+            color: var(--error-color);
+            background-color: #ffebee;
+            border: 1px solid #ffcdd2;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            .violations-grid {
+                grid-template-columns: 1fr;
+            }
+            .violation-images {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>ระบบตรวจจับการไม่สวมหมวกกันน็อค</h1>
+            <p>ตรวจจับและบันทึกการกระทำผิดกฎจราจรแบบอัตโนมัติ</p>
+        </div>
+
+        <div class="upload-section">
+            <form id="uploadForm">
+                <label for="video">เลือกไฟล์วิดีโอที่ต้องการตรวจสอบ</label>
+                <input type="file" id="video" name="video" accept=".mp4,.avi,.mov" required>
+                <button type="submit" class="upload-button">เริ่มตรวจจับ</button>
+            </form>
+            <div id="uploadError"></div>
+            <div class="progress-bar-container">
+                <div class="progress-bar">
+                    <div class="progress-bar-fill"></div>
+                </div>
+                <div class="progress-text">กำลังอัปโหลด: 0%</div>
+            </div>
+        </div>
+
+        <div class="video-section">
+            <div class="video-container">
+                <img id="videoStream" src="" alt="Video Stream">
+            </div>
+        </div>
+
+        <div class="violations-section">
+            <div class="violations-header">
+                <h2>รายการละเมิดที่ตรวจพบ</h2>
+                <span class="violation-count">0 รายการ</span>
+            </div>
+            <div id="violationsList" class="violations-grid"></div>
+        </div>
+    </div>
+
+    <script>
+        $('#uploadForm').on('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const progressBar = $('.progress-bar-fill');
+            const progressText = $('.progress-text');
+            const progressContainer = $('.progress-bar-container');
+
+            $('#uploadError').hide();
+            progressContainer.show();
+
+            $.ajax({
+                url: '/upload',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                xhr: function() {
+                    const xhr = new window.XMLHttpRequest();
+                    xhr.upload.addEventListener('progress', function(e) {
+                        if (e.lengthComputable) {
+                            const percentComplete = (e.loaded / e.total) * 100;
+                            progressBar.css('width', percentComplete + '%');
+                            progressText.text(`กำลังอัปโหลด: ${Math.round(percentComplete)}%`);
+                        }
+                    }, false);
+                    return xhr;
+                },
+                success: function(response) {
+                    if (response.success) {
+                        const videoUrl = `/video_feed/${response.filename}`;
+                        $('#videoStream').attr('src', videoUrl);
+                    }
+                },
+                error: function(xhr) {
+                    $('#uploadError').text('ไม่สามารถอัปโหลดไฟล์ได้ กรุณาลองใหม่').show();
+                    progressContainer.hide();
+                }
+            });
+        });
+
+        function formatDateTimeBangkok(timestamp) {
+            // แปลง timestamp เป็น Date Object
+            const utcDate = new Date(timestamp);
+
+            // ปรับเวลาให้เป็นเขตเวลา Bangkok (UTC+7)
+            const bangkokOffset = 7 * 60; // Offset เวลาของ Bangkok เป็นนาที
+            const localTime = utcDate.getTime() + bangkokOffset * 60 * 1000;
+            const bangkokDate = new Date(localTime);
+
+            // จัดรูปแบบวันที่และเวลา
+            const day = bangkokDate.getDate();
+            const month = bangkokDate.toLocaleString('th-TH', { month: 'long' });
+            const year = bangkokDate.getFullYear();
+            const hour = String(bangkokDate.getHours()).padStart(2, '0'); // เติม 0 ถ้าชั่วโมงเป็นเลขหลักเดียว
+            const minute = String(bangkokDate.getMinutes()).padStart(2, '0');
+            const second = String(bangkokDate.getSeconds()).padStart(2, '0');
+
+            return `${day} ${month} ${year} ${hour}:${minute}:${second}`;
+        }
+
+        function fetchViolations() {
+            $.ajax({
+                url: '/api/violations',
+                type: 'GET',
+                success: function(data) {
+                    const violationsList = $('#violationsList');
+                    violationsList.empty();
+
+                    $('.violation-count').text(`${data.length} รายการ`);
+
+                    data.forEach(v => {
+                        const card = `
+                            <div class="violation-card">
+                                <div class="violation-images">
+                                    <div class="violation-image-container">
+                                        <img src="/detections/${v.motorcycle_image}" alt="รถจักรยานยนต์">
+                                        <div class="image-label">รถจักรยานยนต์</div>
+                                    </div>
+                                    <div class="violation-image-container">
+                                        <img src="/detections/${v.plate_image}" alt="ป้ายทะเบียน">
+                                        <div class="image-label">ป้ายทะเบียน</div>
+                                    </div>
+                                </div>
+                                <div class="violation-info">
+                                    <div class="license-plate">
+                                        ทะเบียน: ${v.license_plate_text || 'รอการตรวจสอบ'}
+                                    </div>
+                                    <div class="violation-details">
+                                        <div>ประเภท: ไม่สวมหมวกกันน็อค</div>
+                                        <div>ความแม่นยำ: ${v.license_plate_confidence 
+                                            ? v.license_plate_confidence.toFixed(2)
+                                            : v.confidence.toFixed(2)}%</div>
+                                    </div>
+                                    <div class="timestamp">
+                                        บันทึกเมื่อ: ${formatDateTimeBangkok(v.timestamp)}
+                                    </div>
+                                </div>
+                            </div>`;
+                        violationsList.prepend(card);
+                    });
+                },
+                error: function(xhr) {
+                    console.error('ไม่สามารถดึงข้อมูลการละเมิดได้:', xhr);
+                }
+            });
+        }
+
+        $(document).ready(function() {
+            fetchViolations();
+            setInterval(fetchViolations, 5000);
+        });
+    </script>
+</body>
+</html>

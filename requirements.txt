@@ -1,0 +1,39 @@
+# Web Framework and Extensions
+flask==2.3.3
+requests==2.31.0
+werkzeug==2.3.7
+gunicorn==21.2.0
+python-dotenv==1.0.0
+
+# Computer Vision and Deep Learning
+ultralytics==8.0.196
+torch==2.1.1
+opencv-python==4.9.0.80
+easyocr==1.7.1
+pillow==10.2.0
+
+# Data Processing
+numpy>=1.22
+pandas==2.2.0
+
+# Database and Caching
+redis==5.0.1
+# sqlite3==2.6.0
+
+# Development Tools
+python-multipart==0.0.6
+tqdm==4.66.1
+
+# Testing and Debugging
+pytest==7.4.3
+pytest-cov==4.1.0
+pytest-mock==3.12.0
+
+# Code Quality
+black==23.12.1
+flake8==7.0.0
+isort==5.13.2
+
+# Documentation
+sphinx==7.1.2
+sphinx-rtd-theme==1.3.0

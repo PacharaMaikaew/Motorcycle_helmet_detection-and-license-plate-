@@ -1,0 +1,57 @@
+version: '3.8'
+services:
+  frontend:
+    build: ./frontend
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./uploads:/app/uploads:rw
+      - ./detections:/app/detections:rw
+      - ./streams:/app/streams:rw
+    depends_on:
+      - detector
+      - processor
+      - database
+    environment:
+      - UPLOAD_FOLDER=/app/uploads
+      - DETECTION_FOLDER=/app/detections
+      - STREAM_FOLDER=/app/streams
+
+  detector:
+    build: ./detector
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./uploads:/app/uploads:ro
+      - ./detections:/app/detections:rw
+      - ./streams:/app/streams:rw
+      - ./models:/app/models:ro
+    environment:
+      - MODEL_PATH=/app/models/helmetthai.pt
+      - DETECTION_FOLDER=/app/detections
+      - STREAM_FOLDER=/app/streams
+
+  processor:
+    build: ./processor
+    ports:
+      - "5002:5002"
+    volumes:
+      - ./detections:/app/detections
+    depends_on:
+      - detector
+    environment:
+      - DETECTION_FOLDER=/app/detections
+
+  database:
+    build: ./database
+    ports:
+      - "5003:5003"
+    volumes:
+      - ./data:/app/data
+    environment:
+      - DB_PATH=/app/data/violations.db
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
